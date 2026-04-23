@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Draftea — Misiones V3 Demo</title>
+    <link rel="icon" href="assets/draftea-square-logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,400;0,500;0,700;0,900;1,900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      html, body {
+        background: #000; color: #FBFBFB;
+        font-family: 'Red Hat Display', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        overflow-x: hidden; -webkit-font-smoothing: antialiased;
+      }
+      #root { min-height: 100vh; display: flex; justify-content: center; background: #000; }
+      button { font-family: inherit; }
+      code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; }
+
+      @keyframes dfFadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes dfSlideUp { from { transform: translateY(24px); opacity: 0.4; } to { transform: translateY(0); opacity: 1; } }
+      @keyframes dfToastIn { from { transform: translate(-50%, -16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+      @keyframes dfChestPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255,176,32,0.35); }
+        50%      { box-shadow: 0 0 0 14px rgba(255,176,32,0); }
+      }
+      @keyframes dfPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50%      { transform: scale(1.06); opacity: 0.92; }
+      }
+      @keyframes dfWiggle {
+        0%, 100% { transform: rotate(-4deg); }
+        50%      { transform: rotate(4deg); }
+      }
+      @keyframes dfConfetti {
+        0%   { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) rotate(0); opacity: 1; }
+        100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(var(--dist)) rotate(720deg); opacity: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="tokens.js"></script>
+    <script src="personas.js"></script>
+    <script src="missions-data.js"></script>
+    <script type="text/babel" src="components/BottomNav.jsx"></script>
+    <script type="text/babel" src="app-core.jsx"></script>
+    <script type="text/babel" src="app-overlays.jsx"></script>
+    <script type="text/babel" src="App.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: radial-gradient(ellipse at 20% 10%, #1b1038 0%, #0D0D1A 55%, #05030d 100%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+        color: #FBFBFB;
+      }
+
+      /* ── Side copy (left) ── */
+      .side {
+        position: absolute; left: 80px; top: 140px; width: 640px;
+      }
+      .eyebrow {
+        color: #9730FF; font-size: 18px; font-weight: 700; letter-spacing: 4px;
+        text-transform: uppercase; margin-bottom: 20px; opacity: 0;
+      }
+      .headline {
+        font-size: 88px; font-weight: 800; line-height: 1.02; letter-spacing: -2px;
+        color: #FBFBFB; margin-bottom: 20px;
+      }
+      .headline .accent {
+        background: linear-gradient(135deg, #4B20FF, #9730FF, #FFDE4E);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .subhead {
+        font-size: 22px; line-height: 1.45; color: #B5B5CC; max-width: 560px;
+        opacity: 0;
+      }
+
+      /* ── Callout card (left, appears later) ── */
+      .callout {
+        position: absolute; left: 80px; top: 640px; width: 560px;
+        background: rgba(151, 48, 255, 0.08);
+        border: 1px solid rgba(151, 48, 255, 0.35);
+        border-radius: 20px; padding: 24px 28px;
+        backdrop-filter: blur(6px);
+        opacity: 0;
+      }
+      .callout-label {
+        color: #FFDE4E; font-size: 13px; font-weight: 800; letter-spacing: 2.5px;
+        text-transform: uppercase; margin-bottom: 10px;
+      }
+      .callout-title {
+        font-size: 30px; font-weight: 800; line-height: 1.15; margin-bottom: 8px;
+      }
+      .callout-body {
+        font-size: 16px; line-height: 1.5; color: #B5B5CC;
+      }
+
+      /* ── KPI row (bottom-left) ── */
+      .kpi-row {
+        position: absolute; left: 80px; bottom: 110px; display: flex; gap: 28px;
+      }
+      .kpi { opacity: 0; }
+      .kpi-value {
+        font-size: 46px; font-weight: 800; line-height: 1;
+        background: linear-gradient(135deg, #4AE291, #FFDE4E);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        margin-bottom: 6px;
+      }
+      .kpi-label {
+        font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+        color: #78788C; font-weight: 700;
+      }
+
+      /* ── Phone frame (right) ── */
+      .phone-stage {
+        position: absolute; right: 140px; top: 60px;
+        width: 480px; height: 960px;
+        transform-origin: center center;
+      }
+      .phone {
+        width: 100%; height: 100%;
+        background: #0D0D1A;
+        border: 10px solid #1A1A2E;
+        border-radius: 56px;
+        box-shadow: 0 40px 120px rgba(75, 32, 255, 0.25), 0 20px 60px rgba(0,0,0,0.6);
+        overflow: hidden;
+        position: relative;
+      }
+      .notch {
+        position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+        width: 120px; height: 28px; background: #000; border-radius: 14px; z-index: 10;
+      }
+
+      .phone-inner {
+        padding: 48px 18px 18px; height: 100%; overflow: hidden; position: relative;
+      }
+
+      .status-title {
+        text-align: center; font-size: 18px; font-weight: 700; color: #FBFBFB;
+        padding: 8px 0 14px;
+      }
+
+      /* Tier badge */
+      .tier-stack { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 14px; }
+      .tier-badge {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: linear-gradient(135deg, #4B20FF, #9730FF);
+        display: flex; align-items: center; justify-content: center;
+        color: #FBFBFB; font-size: 20px; font-weight: 800;
+        border: 2px solid #9730FF;
+        box-shadow: 0 8px 24px rgba(151,48,255,0.45);
+      }
+      .tier-name {
+        color: #9730FF; font-size: 13px; font-weight: 700;
+        letter-spacing: 1.8px; text-transform: uppercase;
+      }
+
+      /* XP bar */
+      .xp-row { padding: 0 16px; margin-bottom: 14px; }
+      .xp-labels {
+        display: flex; justify-content: space-between; margin-bottom: 6px;
+        font-size: 12px; font-weight: 600;
+      }
+      .xp-bar-track {
+        height: 6px; border-radius: 3px; background: #282840; overflow: hidden;
+      }
+      .xp-bar-fill {
+        height: 100%; width: 25%;
+        background: linear-gradient(135deg, #4B20FF, #9730FF);
+        border-radius: 3px;
+      }
+
+      /* Mission count bar */
+      .mc-row { padding: 0 16px; margin-bottom: 8px; }
+      .mc-labels {
+        display: flex; justify-content: space-between; margin-bottom: 6px;
+        font-size: 12px; font-weight: 600;
+      }
+      .mc-labels .count { color: #9730FF; }
+      .mc-bar-track { height: 4px; border-radius: 2px; background: #282840; overflow: hidden; }
+      .mc-bar-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(135deg, #4B20FF, #9730FF);
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex; padding: 0 16px; margin: 12px 0 14px;
+      }
+      .tab {
+        flex: 1; padding: 10px 0; font-size: 14px; font-weight: 600;
+        border-bottom: 2px solid transparent; text-align: center;
+        color: #78788C;
+      }
+      .tab.active { color: #FBFBFB; border-bottom-color: #9730FF; }
+
+      /* Category groups */
+      .groups { padding: 0 16px; }
+      .group { margin-bottom: 18px; }
+      .group-head {
+        display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+      }
+      .group-chip {
+        width: 4px; height: 16px; border-radius: 2px;
+      }
+      .group-label {
+        font-size: 11px; font-weight: 800; letter-spacing: 0.6px;
+        text-transform: uppercase;
+      }
+      .group-pill {
+        margin-left: auto; font-size: 11px; font-weight: 800;
+        border-radius: 10px; padding: 2px 8px;
+      }
+      .group-sub {
+        color: #B5B5CC; font-size: 11px; font-style: italic;
+        margin: -4px 0 10px 12px;
+      }
+
+      .group-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px; position: relative;
+      }
+      .connector {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 24px; height: 24px; border-radius: 12px;
+        background: #231E3C; border: 1.5px dashed rgba(255,222,78,0.7);
+        display: flex; align-items: center; justify-content: center;
+        color: #FFDE4E; font-size: 13px; font-weight: 800; z-index: 3;
+      }
+
+      .mcard {
+        background: #1A1A2E; border: 1px solid transparent;
+        border-radius: 14px; padding: 14px 10px; text-align: center;
+        position: relative; transition: none;
+      }
+      .mcard.grouped { border-color: rgba(255,222,78,0.22); }
+      .mcard .step-badge {
+        position: absolute; top: 8px; right: 8px;
+        background: rgba(255,222,78,0.14); color: #FFDE4E;
+        border-radius: 6px; padding: 2px 6px;
+        font-size: 9px; font-weight: 800; letter-spacing: 0.4px;
+      }
+      .mcard .icon { font-size: 26px; margin-bottom: 8px; line-height: 1; }
+      .mcard .name {
+        font-size: 11px; font-weight: 600; line-height: 1.25; color: #FBFBFB;
+        min-height: 28px;
+      }
+      .mcard .xp { font-size: 11px; font-weight: 800; margin-top: 6px; }
+
+      .mcard.done { background: rgba(74,226,145,0.08); border-color: rgba(74,226,145,0.35); }
+      .mcard.done .icon { color: #4AE291; }
+      .mcard.done .name { color: #4AE291; opacity: 0.8; }
+      .mcard.done .xp { color: #4AE291; }
+
+      .mcard .check {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        font-size: 36px; color: #4AE291; opacity: 0; transform: scale(0.4);
+        background: rgba(74,226,145,0.08); border-radius: 13px;
+      }
+
+      /* Start-here tag */
+      .start-tag {
+        position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+        background: #9730FF; border-radius: 6px; padding: 2px 8px;
+        font-size: 9px; font-weight: 800; color: #FBFBFB; letter-spacing: 0.5px;
+        white-space: nowrap;
+      }
+
+      /* Toast */
+      .toast {
+        position: absolute; top: 64px; left: 50%; transform: translateX(-50%) translateY(-40px);
+        background: #4AE291; border-radius: 12px; padding: 10px 18px;
+        display: flex; align-items: center; gap: 10px;
+        box-shadow: 0 8px 30px rgba(74,226,145,0.35);
+        opacity: 0; z-index: 20;
+        white-space: nowrap;
+      }
+      .toast .check-ic {
+        width: 20px; height: 20px; border-radius: 10px; background: #0D0D1A;
+        display: flex; align-items: center; justify-content: center;
+        color: #4AE291; font-weight: 800; font-size: 12px;
+      }
+      .toast .txt { color: #0D0D1A; font-weight: 800; font-size: 13px; }
+
+      /* Unlock banner (inside withdrawals group) */
+      .unlock-banner {
+        margin-top: 10px; padding: 10px 14px; border-radius: 12px;
+        background: rgba(74,226,145,0.14); color: #4AE291;
+        font-weight: 800; font-size: 13px; text-align: center;
+        opacity: 0; transform: translateY(10px);
+      }
+
+      /* Spotlight ring around withdrawals group */
+      .spotlight {
+        position: absolute; pointer-events: none;
+        border-radius: 20px; border: 2px solid rgba(255,222,78,0.55);
+        box-shadow: 0 0 0 9999px rgba(5,3,13,0.55), 0 0 40px rgba(255,222,78,0.4);
+        opacity: 0;
+      }
+
+      /* Logo ribbon bottom */
+      .foot {
+        position: absolute; bottom: 40px; left: 80px; right: 80px;
+        display: flex; justify-content: space-between; align-items: center;
+        color: #78788C; font-size: 13px; letter-spacing: 1px;
+      }
+      .foot-brand { color: #FBFBFB; font-weight: 800; letter-spacing: 3px; }
+
+      /* Closing overlay */
+      .closer {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse at center, rgba(151,48,255,0.25), rgba(5,3,13,0.95) 70%);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        opacity: 0; z-index: 50;
+      }
+      .closer-title {
+        font-size: 104px; font-weight: 800; letter-spacing: -2px;
+        background: linear-gradient(135deg, #FFDE4E, #9730FF);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .closer-sub {
+        font-size: 28px; color: #B5B5CC; margin-top: 16px; font-weight: 600;
+      }
+      .closer-meta {
+        font-size: 16px; color: #78788C; margin-top: 40px; letter-spacing: 2px; text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="22"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- ══ LEFT COPY ══ -->
+      <div class="side clip" data-start="0" data-duration="22" data-track-index="1">
+        <div id="eyebrow" class="eyebrow">Draftea · Loyalty V1</div>
+        <h1 id="headline" class="headline">
+          <span>Misiones</span><br/>
+          <span class="accent">con propósito</span>
+        </h1>
+        <p id="subhead" class="subhead">
+          El onboarding guiado para Loyalty V1: 8 misiones que aceleran al usuario
+          hacia Tier 1 y desbloquean retiros instantáneos.
+        </p>
+      </div>
+
+      <!-- ══ CALLOUT (spotlight) ══ -->
+      <div id="callout" class="callout clip" data-start="9.5" data-duration="11.5" data-track-index="2">
+        <div class="callout-label">Nuevo en V1</div>
+        <div class="callout-title">KYC&nbsp;+&nbsp;CLABE = Retiros instantáneos</div>
+        <div class="callout-body">
+          Dos misiones emparejadas. Completa ambas y el usuario retira al instante
+          vía SPEI — sin letra chica, sin esperas.
+        </div>
+      </div>
+
+      <!-- ══ KPI ROW ══ -->
+      <div class="kpi-row">
+        <div id="kpi1" class="kpi clip" data-start="17.5" data-duration="4.5" data-track-index="3">
+          <div class="kpi-value">+12pp</div>
+          <div class="kpi-label">Retención W1 target</div>
+        </div>
+        <div id="kpi2" class="kpi clip" data-start="18.0" data-duration="4.0" data-track-index="6">
+          <div class="kpi-value">70%</div>
+          <div class="kpi-label">KYC completion W1</div>
+        </div>
+        <div id="kpi3" class="kpi clip" data-start="18.5" data-duration="3.5" data-track-index="7">
+          <div class="kpi-value">8</div>
+          <div class="kpi-label">Misiones onboarding</div>
+        </div>
+      </div>
+
+      <!-- ══ PHONE ══ -->
+      <div id="phoneStage" class="phone-stage clip" data-start="0" data-duration="22" data-track-index="4">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="phone-inner">
+            <div class="status-title">Mi perfil</div>
+
+            <!-- Tier -->
+            <div class="tier-stack">
+              <div class="tier-badge">0</div>
+              <div class="tier-name">Rookie</div>
+            </div>
+
+            <!-- XP bar -->
+            <div class="xp-row">
+              <div class="xp-labels">
+                <span>125 XP</span>
+                <span style="color:#78788C">500 XP para Tier 1</span>
+              </div>
+              <div class="xp-bar-track"><div id="xpFill" class="xp-bar-fill"></div></div>
+            </div>
+
+            <!-- Mission count bar -->
+            <div class="mc-row">
+              <div class="mc-labels">
+                <span>Misiones</span>
+                <span id="mcCount" class="count">0/8</span>
+              </div>
+              <div class="mc-bar-track"><div id="mcFill" class="mc-bar-fill"></div></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+              <div class="tab active">Misiones</div>
+              <div class="tab">Recompensas</div>
+            </div>
+
+            <!-- Groups -->
+            <div class="groups">
+
+              <!-- Empezar -->
+              <div id="g-start" class="group">
+                <div class="group-head">
+                  <div class="group-chip" style="background:#58C7FF"></div>
+                  <span class="group-label" style="color:#58C7FF">EMPEZAR</span>
+                </div>
+                <div class="group-grid">
+                  <div class="mcard" style="position:relative">
+                    <div class="start-tag">EMPIEZA AQUÍ</div>
+                    <div class="icon">🎯</div>
+                    <div class="name">Haz tu primera apuesta</div>
+                    <div class="xp" style="color:#9730FF">+25 XP</div>
+                  </div>
+                  <div class="mcard">
+                    <div class="icon">⚡</div>
+                    <div class="name">Apuesta en vivo</div>
+                    <div class="xp" style="color:#9730FF">+50 XP</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subir de nivel -->
+              <div id="g-level" class="group">
+                <div class="group-head">
+                  <div class="group-chip" style="background:#9730FF"></div>
+                  <span class="group-label" style="color:#9730FF">SUBIR DE NIVEL</span>
+                </div>
+                <div class="group-grid">
+                  <div class="mcard">
+                    <div class="icon">🔗</div>
+                    <div class="name">Parlay de 3+ picks</div>
+                    <div class="xp" style="color:#9730FF">+50 XP</div>
+                  </div>
+                  <div class="mcard">
+                    <div class="icon">💰</div>
+                    <div class="name">Cierra apuesta con ganancia</div>
+                    <div class="xp" style="color:#9730FF">+50 XP</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Explorar -->
+              <div id="g-explore" class="group">
+                <div class="group-head">
+                  <div class="group-chip" style="background:#4AE291"></div>
+                  <span class="group-label" style="color:#4AE291">EXPLORAR</span>
+                </div>
+                <div class="group-grid">
+                  <div class="mcard">
+                    <div class="icon">🎁</div>
+                    <div class="name">Usa un beneficio</div>
+                    <div class="xp" style="color:#9730FF">+75 XP</div>
+                  </div>
+                  <div class="mcard">
+                    <div class="icon">🎰</div>
+                    <div class="name">Prueba un casino game</div>
+                    <div class="xp" style="color:#9730FF">+75 XP</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Retiros instantáneos (grouped) -->
+              <div id="g-withdraw" class="group" style="background:rgba(255,222,78,0.06); border:1px solid rgba(255,222,78,0.28); border-radius:16px; padding:14px;">
+                <div class="group-head">
+                  <div class="group-chip" style="background:#FFDE4E"></div>
+                  <span class="group-label" style="color:#FFDE4E">RETIROS INSTANTÁNEOS</span>
+                  <span class="group-pill" style="color:#FFDE4E; background:rgba(255,222,78,0.12)">
+                    <span id="wcount">0</span>/2
+                  </span>
+                </div>
+                <div class="group-sub">🔒 Completa ambas para retirar al instante</div>
+                <div class="group-grid">
+                  <div class="connector" id="connector">+</div>
+
+                  <div id="m7" class="mcard grouped">
+                    <div class="step-badge">PASO 1</div>
+                    <div class="icon">🛡️</div>
+                    <div class="name">Verifica tu identidad (KYC)</div>
+                    <div class="xp" style="color:#FFDE4E">+75 XP</div>
+                    <div class="check">✓</div>
+                  </div>
+
+                  <div id="m8" class="mcard grouped">
+                    <div class="step-badge">PASO 2</div>
+                    <div class="icon">🏦</div>
+                    <div class="name">Configura tu CLABE</div>
+                    <div class="xp" style="color:#FFDE4E">+50 XP</div>
+                    <div class="check">✓</div>
+                  </div>
+                </div>
+                <div id="unlockBanner" class="unlock-banner">✓ Retiros instantáneos desbloqueados</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Spotlight ring overlay (positioned over withdrawals group) -->
+        <div id="spotlight" class="spotlight"></div>
+
+        <!-- Toast -->
+        <div id="toast" class="toast">
+          <div class="check-ic">✓</div>
+          <div class="txt">Retiros instantáneos desbloqueados</div>
+        </div>
+      </div>
+
+      <!-- ══ FOOT ══ -->
+      <div class="foot clip" data-start="0" data-duration="22" data-track-index="5">
+        <div class="foot-brand">DRAFTEA · LOYALTY</div>
+        <div>Misiones V1 · Abril 2026</div>
+      </div>
+
+      <!-- ══ CLOSER ══ -->
+      <div id="closer" class="closer clip" data-start="19.5" data-duration="2.5" data-track-index="10">
+        <div class="closer-title">Misiones V1</div>
+        <div class="closer-sub">Guía, acelera, retiene.</div>
+        <div class="closer-meta">Draftea · Q2 2026</div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+      // ── 0-3.0s: Intro copy
+      tl.from("#eyebrow", { opacity: 0, y: 20, duration: 0.6 }, 0.2)
+        .to("#eyebrow", { opacity: 1, duration: 0.01 }, 0.2)
+        .from("#headline", { opacity: 0, y: 40, duration: 0.9 }, 0.5)
+        .from("#subhead", { opacity: 0, y: 20, duration: 0.8 }, 1.1)
+        .to("#subhead", { opacity: 1, duration: 0.01 }, 1.1);
+
+      // ── 0.8-2.5s: Phone slides in from right
+      tl.from("#phoneStage", { x: 400, opacity: 0, duration: 1.2, ease: "power4.out" }, 0.8);
+
+      // ── 2.5-3.0s: XP bar fill
+      tl.from("#xpFill", { width: 0, duration: 0.6, ease: "power2.inOut" }, 2.6);
+
+      // ── 3.0-9.0s: Quest board reveal (stagger)
+      tl.from("#g-start", { opacity: 0, y: 30, duration: 0.5 }, 3.2)
+        .from("#g-level", { opacity: 0, y: 30, duration: 0.5 }, 3.9)
+        .from("#g-explore", { opacity: 0, y: 30, duration: 0.5 }, 4.6)
+        .from("#g-withdraw", { opacity: 0, y: 30, duration: 0.6 }, 5.3);
+
+      // ── 6.0-7.0s: Connector scales in
+      tl.to("#connector", { scale: 1, duration: 0.45, ease: "back.out(2)" }, 6.2);
+
+      // ── 7.5-12.5s: Spotlight on withdrawals group + callout
+      tl.set("#spotlight", {
+        top: 622, left: 14, width: 446, height: 258,
+      }, 7.4)
+        .to("#spotlight", { opacity: 1, duration: 0.5 }, 7.6)
+        .to("#phoneStage", { scale: 1.08, x: -60, duration: 1.0, ease: "power2.inOut" }, 7.8)
+        .from("#callout", { opacity: 0, x: -40, duration: 0.7 }, 9.5)
+        .to("#callout", { opacity: 1, duration: 0.01 }, 9.5);
+
+      // ── 11.5-14.0s: KYC card check
+      tl.to("#m7 .check", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.8)" }, 11.5)
+        .to("#m7", { borderColor: "rgba(74,226,145,0.5)", backgroundColor: "rgba(74,226,145,0.1)", duration: 0.3 }, 11.5)
+        .to("#wcount", { innerText: "1", duration: 0.01 }, 11.8)
+        .to("#mcFill", { width: ((1/8)*100) + "%", duration: 0.4 }, 11.8);
+
+      // ── 13.0-15.0s: CLABE card check
+      tl.to("#m8 .check", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.8)" }, 13.2)
+        .to("#m8", { borderColor: "rgba(74,226,145,0.5)", backgroundColor: "rgba(74,226,145,0.1)", duration: 0.3 }, 13.2)
+        .to("#wcount", { innerText: "2", duration: 0.01 }, 13.5)
+        .to("#mcFill", { width: ((2/8)*100) + "%", duration: 0.4 }, 13.5);
+
+      // ── 14.5-16.5s: Unlock banner rises
+      tl.to("#unlockBanner", { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.6)" }, 14.8);
+
+      // ── 15.2-17.5s: Toast
+      tl.to("#toast", { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.8)" }, 15.4)
+        .to("#toast", { opacity: 0, y: -20, duration: 0.4 }, 17.0);
+
+      // ── 16.5-18.5s: Zoom out + KPIs
+      tl.to("#phoneStage", { scale: 1.0, x: 0, duration: 1.0, ease: "power2.inOut" }, 16.8)
+        .to("#spotlight", { opacity: 0, duration: 0.6 }, 17.0)
+        .from("#kpi1", { opacity: 0, y: 20, duration: 0.5 }, 17.5)
+        .to("#kpi1", { opacity: 1, duration: 0.01 }, 17.5)
+        .from("#kpi2", { opacity: 0, y: 20, duration: 0.5 }, 17.9)
+        .to("#kpi2", { opacity: 1, duration: 0.01 }, 17.9)
+        .from("#kpi3", { opacity: 0, y: 20, duration: 0.5 }, 18.3)
+        .to("#kpi3", { opacity: 1, duration: 0.01 }, 18.3);
+
+      // ── 19.5-22s: Closer
+      tl.to("#closer", { opacity: 1, duration: 0.8, ease: "power2.inOut" }, 19.6)
+        .from("#closer .closer-title", { y: 40, opacity: 0, duration: 0.8 }, 19.7)
+        .from("#closer .closer-sub", { y: 20, opacity: 0, duration: 0.7 }, 20.1)
+        .from("#closer .closer-meta", { opacity: 0, duration: 0.7 }, 20.7);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

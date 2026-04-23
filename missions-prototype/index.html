@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Draftea · Missions</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,400;0,500;0,700;0,900;1,900&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #0A0A0A; font-family: 'Red Hat Display', -apple-system, system-ui, sans-serif; color: #FBFBFB; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  button { font-family: inherit; }
+  @keyframes dfFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes dfSlideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes dfPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.8; }
+  }
+  @keyframes dfWiggle {
+    0%, 100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg); }
+  }
+  @keyframes dfConfetti {
+    0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(var(--dist)) rotate(720deg); opacity: 0; }
+  }
+  /* stage layout */
+  .stage {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 24px; background: radial-gradient(ellipse at top, #1a1030 0%, #0a0a0a 55%);
+    gap: 32px;
+  }
+  .sideControls {
+    position: fixed; top: 24px; right: 24px; z-index: 1000;
+    display: flex; flex-direction: column; gap: 8px;
+    max-width: 240px;
+  }
+  .sideControls h4 {
+    margin: 0 0 4px; font-size: 10px; font-weight: 900; letter-spacing: 0.5px;
+    color: rgba(251,251,251,0.5); text-transform: uppercase;
+  }
+  .statePanel {
+    background: rgba(30,30,30,0.9); backdrop-filter: blur(12px);
+    border: 1px solid rgba(251,251,251,0.08);
+    border-radius: 16px; padding: 14px;
+  }
+  .stateBtn {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 10px 12px; border-radius: 10px; border: 1px solid transparent;
+    background: transparent; color: rgba(251,251,251,0.7); cursor: pointer;
+    font-family: inherit; font-size: 13px; font-weight: 500; text-align: left;
+    transition: background 0.15s;
+  }
+  .stateBtn:hover { background: rgba(251,251,251,0.04); }
+  .stateBtn.active {
+    background: rgba(75,32,255,0.2); border-color: rgba(151,48,255,0.35);
+    color: #FBFBFB; font-weight: 700;
+  }
+  .stateDot {
+    width: 8px; height: 8px; border-radius: 999px; background: rgba(251,251,251,0.3);
+    flex-shrink: 0;
+  }
+  .stateBtn.active .stateDot { background: #D2FF72; box-shadow: 0 0 8px #D2FF72; }
+  .stateDesc { font-size: 11px; color: rgba(251,251,251,0.45); margin-top: 2px; line-height: 1.3; }
+  .projectInfo {
+    background: rgba(30,30,30,0.6); border-radius: 12px; padding: 12px;
+    font-size: 11px; color: rgba(251,251,251,0.55); line-height: 1.5;
+  }
+  .projectInfo b { color: rgba(251,251,251,0.85); font-weight: 700; }
+  .shortcut { font-size: 10px; color: rgba(251,251,251,0.4); display: flex; gap: 6px; flex-wrap: wrap; }
+  .kbd {
+    background: rgba(251,251,251,0.08); border: 1px solid rgba(251,251,251,0.12);
+    border-radius: 4px; padding: 1px 5px; font-family: ui-monospace, monospace;
+  }
+  @media (max-width: 900px) {
+    .sideControls { position: static; max-width: unset; flex-direction: row; flex-wrap: wrap; }
+    .stage { flex-direction: column; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div id="device-mount"></div>
+  <div class="sideControls">
+    <div class="statePanel">
+      <h4>Estado del usuario</h4>
+      <div id="state-list"></div>
+    </div>
+    <div class="statePanel">
+      <h4>Layout del onboarding</h4>
+      <div id="layout-list"></div>
+    </div>
+    <div class="projectInfo">
+      <b>Draftea · Misiones</b><br/>
+      Prototipo interactivo · iOS<br/>
+      <span style="opacity:0.7">Usa el panel para saltar entre estados, o toca una misión para abrir el detalle.</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="tokens.js"></script>
+<script src="missions-data.js"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="df-components.jsx"></script>
+<script type="text/babel" src="quest-board.jsx"></script>
+<script type="text/babel" src="weekly-missions.jsx"></script>
+<script type="text/babel" src="mission-detail.jsx"></script>
+<script type="text/babel" src="loyalty-landing.jsx"></script>
+<script type="text/babel" src="app-shell.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "initialState": "onboarding",
+  "onboardingLayout": "list"
+}/*EDITMODE-END*/;
+
+const STATES = [
+  { id: 'onboarding',     label: 'Onboarding',        desc: '3/10 completadas, B3 en progreso' },
+  { id: 'graduating',     label: 'Graduándose',       desc: '9/10 — última misión casi lista' },
+  { id: 'ongoing',        label: 'Semanal (curso)',   desc: '2/5 esta semana, sin cofre aún' },
+  { id: 'ongoing-chest',  label: 'Cofre desbloqueado',desc: '4/5 completadas, listo para girar' },
+];
+
+const LAYOUTS = [
+  { id: 'list',  label: 'Lista agrupada',  desc: 'Grupos colapsables A · B · C · D' },
+  { id: 'trail', label: 'Sendero (Duolingo)', desc: 'Camino zigzag con nodos por misión' },
+];
+
+function Prototype() {
+  const [state, setState] = React.useState(
+    () => localStorage.getItem('dfMode') || TWEAK_DEFAULTS.initialState
+  );
+  const [layout, setLayout] = React.useState(
+    () => localStorage.getItem('dfLayout') || TWEAK_DEFAULTS.onboardingLayout
+  );
+  React.useEffect(() => { localStorage.setItem('dfMode', state); }, [state]);
+  React.useEffect(() => { localStorage.setItem('dfLayout', layout); }, [layout]);
+
+  // Render state list buttons into DOM (outside React tree)
+  React.useEffect(() => {
+    const list = document.getElementById('state-list');
+    if (!list) return;
+    list.innerHTML = '';
+    STATES.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'stateBtn' + (s.id === state ? ' active' : '');
+      btn.innerHTML = `
+        <div class="stateDot"></div>
+        <div style="flex:1">
+          <div>${s.label}</div>
+          <div class="stateDesc">${s.desc}</div>
+        </div>
+      `;
+      btn.onclick = () => setState(s.id);
+      list.appendChild(btn);
+    });
+  }, [state]);
+
+  // Render layout list buttons
+  React.useEffect(() => {
+    const list = document.getElementById('layout-list');
+    if (!list) return;
+    list.innerHTML = '';
+    LAYOUTS.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'stateBtn' + (s.id === layout ? ' active' : '');
+      btn.innerHTML = `
+        <div class="stateDot"></div>
+        <div style="flex:1">
+          <div>${s.label}</div>
+          <div class="stateDesc">${s.desc}</div>
+        </div>
+      `;
+      btn.onclick = () => setLayout(s.id);
+      list.appendChild(btn);
+    });
+  }, [layout]);
+
+  return (
+    <IOSDevice width={390} height={844} dark={true}>
+      <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+        <MissionsApp key={state + '-' + layout} mode={state} onboardingLayout={layout}/>
+      </div>
+    </IOSDevice>
+  );
+}
+
+// Wait for all modules to be ready
+const waitForGlobals = () => new Promise(resolve => {
+  const check = () => {
+    if (window.IOSDevice && window.MissionsApp && window.DF && window.MISSIONS_DATA) {
+      resolve();
+    } else {
+      setTimeout(check, 50);
+    }
+  };
+  check();
+});
+
+waitForGlobals().then(() => {
+  ReactDOM.createRoot(document.getElementById('device-mount')).render(<Prototype/>);
+});
+</script>
+
+</body>
+</html>
