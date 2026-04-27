@@ -57,7 +57,7 @@ const TierChip = ({ level }) => {
 };
 
 // ── Horizontal level track (scroll through levels) ────────────
-const LevelTrack = ({ level, xp, xpNext }) => {
+const LevelTrack = ({ level, xp, xpNext, showTier = true }) => {
   const scrollerRef = useRef(null);
   const slidesRef = useRef({});
 
@@ -118,7 +118,7 @@ const LevelTrack = ({ level, xp, xpNext }) => {
               <div style={{ ...TY.xLargeBold, color: isLocked ? T.fillTertiary : T.fillPrimary }}>
                 Nivel {lvl.n}
               </div>
-              <TierChip level={lvl.n}/>
+              {showTier && <TierChip level={lvl.n}/>}
             </div>
             <div style={{ ...TY.xSmallMedium, color: T.fillSecondary, marginTop: 4, marginBottom: 6 }}>
               {isCurrent && `${remaining.toLocaleString('es-MX')} XP para subir`}

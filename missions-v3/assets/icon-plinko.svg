@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <circle cx="100" cy="54" r="7" fill="#4B20FF"/>
+  <circle cx="84" cy="78" r="7" fill="#4B20FF"/>
+  <circle cx="116" cy="78" r="7" fill="#4B20FF"/>
+  <circle cx="68" cy="102" r="7" fill="#4B20FF"/>
+  <circle cx="100" cy="102" r="7" fill="#4B20FF"/>
+  <circle cx="132" cy="102" r="7" fill="#4B20FF"/>
+  <circle cx="52" cy="126" r="7" fill="#4B20FF"/>
+  <circle cx="84" cy="126" r="7" fill="#4B20FF"/>
+  <circle cx="116" cy="126" r="7" fill="#4B20FF"/>
+  <circle cx="148" cy="126" r="7" fill="#4B20FF"/>
+  <circle cx="108" cy="88" r="11" fill="#D2FF72"/>
+  <path d="M42 146H158V160C158 170 149.9 178 140 178H60C50.1 178 42 170 42 160V146Z" fill="#4B20FF"/>
+  <rect x="56" y="152" width="18" height="20" rx="5" fill="#FBFBFB"/>
+  <rect x="91" y="152" width="18" height="20" rx="5" fill="#FBFBFB"/>
+  <rect x="126" y="152" width="18" height="20" rx="5" fill="#FBFBFB"/>
+  <path d="M108 99L100 114L112 114L101 132" fill="#D2FF72"/>
+</svg>

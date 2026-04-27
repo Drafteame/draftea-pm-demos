@@ -22,6 +22,16 @@ window.PERSONAS = (function () {
 
   const personas = [
     {
+      id: 'adhoc-v1',
+      name: 'V1 Ad-hoc · cashback',
+      level: 4,
+      xp: 7200,
+      xpNext: 10000,
+      flow: 'adhoc-v1',
+      blurb: 'Nueva experiencia de misiones V1 (Apr 27): ad-hoc, cashback automático, opt-in. Layered sobre Lealtad.',
+      tagline: 'Ad-hoc · cashback · opt-in',
+    },
+    {
       id: 'new',
       name: 'Usuario nuevo',
       level: 1,

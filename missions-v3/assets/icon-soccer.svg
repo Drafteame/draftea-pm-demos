@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <circle cx="100" cy="100" r="76" fill="#FBFBFB"/>
+  <path d="M100 50 120 64 112 88H88L80 64 100 50Z" fill="#FBFBFB" stroke="#4B20FF" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M80 64 88 88 72 108 48 100 50 74 80 64Z" fill="#4B20FF" stroke="#4B20FF" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M120 64 112 88 128 108 152 100 150 74 120 64Z" fill="#4B20FF" stroke="#4B20FF" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M72 108 88 88H112L128 108 120 136H80L72 108Z" fill="#FBFBFB" stroke="#4B20FF" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M80 136 72 108 48 100 34 126 52 148 80 136Z" fill="#4B20FF" stroke="#4B20FF" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M120 136 128 108 152 100 166 126 148 148 120 136Z" fill="#4B20FF" stroke="#4B20FF" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M100 50C128 50 152 66 165 90" stroke="#4B20FF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M35 90C48 66 72 50 100 50" stroke="#4B20FF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M52 148C66 160 82 166 100 166C118 166 134 160 148 148" stroke="#4B20FF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M138 34 126 58H140L128 84 160 52H144L156 34H138Z" fill="#D2FF72"/>
+</svg>

@@ -37,10 +37,11 @@ const HomeRouter = ({ onPick }) => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {PERSONAS_LIST.map(p => {
+      {(() => {
+        const PersonaCard = ({ p }) => {
           const def = LEVELS.find(l => l.n === p.level);
           const tier = TIER_COLORS[def.tier];
+          const showTier = p.flow !== 'adhoc-v1';
           return (
             <button key={p.id} onClick={() => onPick(p)} style={{
               width: '100%',
@@ -64,7 +65,9 @@ const HomeRouter = ({ onPick }) => {
                 <img src={def.badge} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'relative', zIndex: 1 }}/>
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ ...TY.xSmallBlack, color: tier.accent, letterSpacing: 0.6 }}>{tier.label} · NIVEL {p.level}</div>
+                <div style={{ ...TY.xSmallBlack, color: tier.accent, letterSpacing: 0.6 }}>
+                  {showTier ? `${tier.label} · NIVEL ${p.level}` : `NIVEL ${p.level}`}
+                </div>
                 <div style={{ ...TY.largeBold, color: T.fillPrimary, marginTop: 2 }}>{p.name}</div>
                 <div style={{ ...TY.smallMedium, color: T.fillSecondary, marginTop: 4, lineHeight: 1.4 }}>{p.blurb}</div>
                 <div style={{
@@ -79,8 +82,36 @@ const HomeRouter = ({ onPick }) => {
               <div style={{ ...TY.headlineBase, color: T.fillTertiary, marginRight: 4 }}>›</div>
             </button>
           );
-        })}
-      </div>
+        };
+
+        const current = PERSONAS_LIST.filter(p => p.flow === 'adhoc-v1');
+        const legacy = PERSONAS_LIST.filter(p => p.flow !== 'adhoc-v1');
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {current.map(p => <PersonaCard key={p.id} p={p}/>)}
+
+            {legacy.length > 0 && (
+              <>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  marginTop: S.x6, marginBottom: 2,
+                }}>
+                  <div style={{ flex: 1, height: 1, background: alpha('#FBFBFB', 0.08) }}/>
+                  <span style={{ ...TY.xSmallBlack, color: T.fillTertiary, letterSpacing: 0.8 }}>
+                    VERSIONES ANTERIORES
+                  </span>
+                  <div style={{ flex: 1, height: 1, background: alpha('#FBFBFB', 0.08) }}/>
+                </div>
+                <div style={{ ...TY.xSmallMedium, color: T.fillTertiary, textAlign: 'center', marginBottom: 6 }}>
+                  Demos previas (v3 onboarding / weekly chest) — referencia histórica.
+                </div>
+                {legacy.map(p => <PersonaCard key={p.id} p={p}/>)}
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       <div style={{ marginTop: 'auto', paddingTop: 28, textAlign: 'center' }}>
         <div style={{ ...TY.xSmallMedium, color: T.fillTertiary }}>
@@ -398,19 +429,60 @@ const MissionsHub = ({ persona, onBack }) => {
 
         {/* Level hero with horizontal track */}
         <div style={{ padding: `${S.x2}px 0 0`, position: 'relative' }}>
-          <window.LevelTrack level={persona.level} xp={persona.xp} xpNext={persona.xpNext}/>
+          <window.LevelTrack level={persona.level} xp={persona.xp} xpNext={persona.xpNext}
+            showTier={persona.flow !== 'adhoc-v1'}/>
         </div>
 
-        {/* Tabs */}
-        <div style={{ padding: `${S.x4}px 0 ${S.x4}px` }}>
-          <window.SegmentedTabs
-            tabs={[{ id: 'missions', label: 'Misiones' }, { id: 'rewards', label: 'Recompensas' }]}
-            active={tab} onChange={setTab}/>
-        </div>
+        {/* Tabs — hidden for V1 ad-hoc, where Misiones + Recompensas render stacked */}
+        {persona.flow !== 'adhoc-v1' && (
+          <div style={{ padding: `${S.x4}px 0 ${S.x4}px` }}>
+            <window.SegmentedTabs
+              tabs={[{ id: 'missions', label: 'Misiones' }, { id: 'rewards', label: 'Recompensas' }]}
+              active={tab} onChange={setTab}/>
+          </div>
+        )}
+        {persona.flow === 'adhoc-v1' && (
+          <div style={{ height: S.x4 }}/>
+        )}
       </div>
 
       {/* Body */}
       <div style={{ paddingBottom: 140 }}>
+        {/* V1 ad-hoc — single stacked view: Misiones followed by Recompensas. */}
+        {persona.flow === 'adhoc-v1' && (
+          <>
+            <window.AdHocV1Misiones persona={persona} setToast={setToast}/>
+
+            {/* Stronger seam: a card-style header announcing the category change */}
+            <div style={{ padding: `${S.x8}px ${S.x8}px ${S.x2}px` }}>
+              <div style={{
+                background: `linear-gradient(135deg, ${alpha(T.actionPrimaryDefaultGradStart, 0.12)} 0%, ${alpha('#FBFBFB', 0.02)} 100%)`,
+                border: `1px solid ${alpha(T.actionPrimaryDefaultGradStart, 0.25)}`,
+                borderRadius: R.large, padding: '14px 16px',
+                display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12,
+                  background: G.actionPrimary,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 22,
+                  boxShadow: `0 8px 18px ${alpha(T.actionPrimaryDefaultGradStart, 0.4)}`,
+                }}>🎁</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ ...TY.baseBold, color: T.fillPrimary, marginBottom: 2 }}>
+                    Tus beneficios de Lealtad
+                  </div>
+                  <div style={{ ...TY.xSmallMedium, color: T.fillTertiary, lineHeight: 1.4 }}>
+                    Lo que ya tenés activo por tu nivel — independiente de las misiones.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <RewardsTab persona={persona} claimedReward={claimedReward}/>
+          </>
+        )}
+
         {tab === 'missions' && persona.flow === 'onboarding' && persona.view === 'trail' && (
           <window.OnboardingTrail
             missions={MD.onboarding}
@@ -527,11 +599,12 @@ const App = () => {
 // Wait for modules before rendering
 const waitForGlobals = () => new Promise(resolve => {
   const check = () => {
-    if (window.DF && window.MISSIONS_DATA && window.PERSONAS && window.LevelBadge
+    if (window.DF && window.MISSIONS_DATA && window.MISSIONS_V1_DATA && window.PERSONAS && window.LevelBadge
         && window.MissionDetailSheet && window.FollowAlong
         && window.PrizeRoulette && window.GraduationScreen && window.Toast
         && window.QuestGroup && window.OnboardingTrail && window.MissionRow && window.LevelTrack
         && window.SegmentedTabs && window.ProgressBar && window.PrizeChestButton
+        && window.AdHocV1Misiones
         && typeof BottomNav !== 'undefined') {
       resolve();
     } else {
