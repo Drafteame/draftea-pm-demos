@@ -433,28 +433,21 @@ const MissionsHub = ({ persona, onBack }) => {
             showTier={persona.flow !== 'adhoc-v1'}/>
         </div>
 
-        {/* Tabs — hidden for V1 ad-hoc, where Misiones + Recompensas render stacked */}
-        {persona.flow !== 'adhoc-v1' && (
-          <div style={{ padding: `${S.x4}px 0 ${S.x4}px` }}>
-            <window.SegmentedTabs
-              tabs={[{ id: 'missions', label: 'Misiones' }, { id: 'rewards', label: 'Recompensas' }]}
-              active={tab} onChange={setTab}/>
-          </div>
-        )}
-        {persona.flow === 'adhoc-v1' && (
-          <div style={{ height: S.x4 }}/>
-        )}
+        {/* Tabs */}
+        <div style={{ padding: `${S.x4}px 0 ${S.x4}px` }}>
+          <window.SegmentedTabs
+            tabs={[{ id: 'missions', label: 'Misiones' }, { id: 'rewards', label: 'Recompensas' }]}
+            active={tab} onChange={setTab}/>
+        </div>
       </div>
 
       {/* Body */}
       <div style={{ paddingBottom: 140 }}>
-        {/* V1 ad-hoc — single stacked view: Misiones followed by Recompensas. */}
-        {persona.flow === 'adhoc-v1' && (
-          <>
-            <window.AdHocV1Misiones persona={persona} setToast={setToast}/>
-
-            <RewardsTab persona={persona} claimedReward={claimedReward}/>
-          </>
+        {tab === 'missions' && persona.flow === 'adhoc-v1' && (
+          <window.AdHocV1Misiones
+            persona={persona}
+            setToast={setToast}
+            onSwitchToRewards={() => setTab('rewards')}/>
         )}
 
         {tab === 'missions' && persona.flow === 'onboarding' && persona.view === 'trail' && (

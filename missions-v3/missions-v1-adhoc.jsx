@@ -405,18 +405,33 @@
         }}/>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: S.x4 }}>
-          {/* Floating illustration — no container */}
-          <div style={{
-            width: 56, height: 56, flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <img src={ILLU(mission.image)} alt=""
-              style={{
-                width: 56, height: 56, objectFit: 'contain',
-                filter: `drop-shadow(0 6px 14px ${alpha(THEMES[mission.theme].glow, 0.4)})`,
-                opacity: isExpired ? 0.55 : 1,
-              }}/>
-          </div>
+          {/* Floating illustration — wrapped in progress ring when in_progress */}
+          {isInProgress ? (
+            <ProgressRing
+              progress={mission.progress}
+              target={mission.qualifying_target}
+              size={64}
+              strokeWidth={3}
+              color={T.actionPrimaryDefaultGradStart}>
+              <img src={ILLU(mission.image)} alt=""
+                style={{
+                  width: 50, height: 50, objectFit: 'contain',
+                  filter: `drop-shadow(0 6px 14px ${alpha(THEMES[mission.theme].glow, 0.4)})`,
+                }}/>
+            </ProgressRing>
+          ) : (
+            <div style={{
+              width: 56, height: 56, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <img src={ILLU(mission.image)} alt=""
+                style={{
+                  width: 56, height: 56, objectFit: 'contain',
+                  filter: `drop-shadow(0 6px 14px ${alpha(THEMES[mission.theme].glow, 0.4)})`,
+                  opacity: isExpired ? 0.55 : 1,
+                }}/>
+            </div>
+          )}
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -502,28 +517,175 @@
     );
   };
 
-  // ── Empty state with bridge to Recompensas ───────────────────
-  const EmptyStateBridge = () => (
+  // ── Filter chips (P3) — only on dense persona ─────────────────
+  const FILTER_DEFS = [
+    { id: 'todas',       label: 'Todas',        match: () => true },
+    { id: 'osb',         label: 'Deportes',     match: m => m.vertical === 'osb' },
+    { id: 'igaming',     label: 'Casino',       match: m => m.vertical === 'igaming' },
+    { id: 'in_progress', label: 'En curso',     match: m => m.state === 'in_progress' },
+    { id: 'completed',   label: 'Completadas',  match: m => m.state === 'completed' },
+  ];
+
+  const FilterChips = ({ active, onChange, counts }) => (
     <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-      padding: `${S.x10}px ${S.x8}px ${S.x6}px`,
+      display: 'flex', gap: 8, overflowX: 'auto',
+      padding: `${S.x2}px 0 ${S.x4}px`,
+      scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+    }}>
+      <style>{`.dfFilters::-webkit-scrollbar { display: none; }`}</style>
+      <div className="dfFilters" style={{ display: 'flex', gap: 8 }}>
+        {FILTER_DEFS.map(def => {
+          const isActive = active === def.id;
+          const count = counts[def.id] ?? 0;
+          return (
+            <button key={def.id} onClick={() => onChange(def.id)} style={{
+              flexShrink: 0, cursor: 'pointer', fontFamily: FONT,
+              padding: '7px 14px', borderRadius: 999,
+              background: isActive ? T.fillAccentStart : alpha('#FBFBFB', 0.06),
+              border: `1px solid ${isActive ? T.fillAccentStart : alpha('#FBFBFB', 0.1)}`,
+              ...TY.xSmallBold, color: isActive ? '#0A0816' : T.fillSecondary,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              transition: 'all 160ms',
+            }}>
+              {def.label}
+              <span style={{
+                ...TY.xxSmallBold,
+                color: isActive ? alpha('#0A0816', 0.65) : T.fillTertiary,
+              }}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // ── Call-to-fill card — shown when actionable mission count is low ────
+  const CallToFillCard = ({ onSwitchToRewards }) => (
+    <div style={{
+      marginTop: S.x4,
+      padding: '14px 16px', borderRadius: R.large,
+      background: `linear-gradient(135deg, ${alpha(T.fillAccentStart, 0.08)} 0%, ${alpha('#FBFBFB', 0.03)} 100%)`,
+      border: `1px dashed ${alpha(T.fillAccentStart, 0.3)}`,
+      display: 'flex', alignItems: 'center', gap: 12,
+      fontFamily: FONT,
     }}>
       <div style={{
-        width: 88, height: 88, borderRadius: '50%',
-        background: alpha(T.fillAccentStart, 0.1),
-        border: `1px solid ${alpha(T.fillAccentStart, 0.25)}`,
+        width: 44, height: 44, borderRadius: '50%',
+        background: alpha(T.fillAccentStart, 0.16),
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 40, marginBottom: S.x4,
-      }}>🎯</div>
-      <div style={{ ...TY.largeBold, color: T.fillPrimary, marginBottom: 6 }}>
-        Por ahora no hay misiones nuevas
+        fontSize: 22, flexShrink: 0,
+      }}>💡</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ ...TY.smallBold, color: T.fillPrimary, marginBottom: 2 }}>
+          Mientras llegan más misiones
+        </div>
+        <div style={{ ...TY.xSmallMedium, color: T.fillTertiary, lineHeight: 1.4 }}>
+          Mirá tus beneficios o explorá juegos populares para sumar Premio.
+        </div>
       </div>
-      <div style={{ ...TY.smallMedium, color: T.fillTertiary, maxWidth: 300, lineHeight: 1.5, marginBottom: S.x4 }}>
-        Mientras tanto, dale un vistazo a los beneficios que ya tenés activos por tu Lealtad.
+      <button onClick={onSwitchToRewards} style={{
+        cursor: 'pointer', fontFamily: FONT, flexShrink: 0,
+        background: 'transparent', border: 'none',
+        ...TY.xSmallBold, color: T.fillAccentStart,
+        padding: '6px 4px',
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+      }}>
+        Ver
+        <span style={{ fontSize: 14 }}>›</span>
+      </button>
+    </div>
+  );
+
+  // ── Mini progress ring (P3) — wraps the icon for in_progress missions ──
+  const ProgressRing = ({ progress, target, size = 64, strokeWidth = 3, color, children }) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const pct = Math.max(0, Math.min(1, progress / target));
+    const offset = circumference - pct * circumference;
+    return (
+      <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+        <svg width={size} height={size} style={{ position: 'absolute', inset: 0 }}>
+          <circle cx={size/2} cy={size/2} r={radius}
+            stroke={alpha('#FBFBFB', 0.12)}
+            strokeWidth={strokeWidth} fill="none"/>
+          <circle cx={size/2} cy={size/2} r={radius}
+            stroke={color} strokeWidth={strokeWidth} fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${size/2} ${size/2})`}
+            style={{ transition: 'stroke-dashoffset 0.6s ease' }}/>
+        </svg>
+        <div style={{
+          position: 'absolute', inset: 4,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {children}
+        </div>
       </div>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
-        ...TY.xSmallBold, color: T.fillAccentStart }}>
-        Mirá tus beneficios <span style={{ fontSize: 18 }}>↓</span>
+    );
+  };
+
+  // ── Empty state with bridge to Recompensas ───────────────────
+  const EmptyStateBridge = ({ onSwitchToRewards }) => (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+      padding: `${S.x12}px ${S.x8}px ${S.x6}px`,
+    }}>
+      <div style={{
+        width: 140, height: 140, marginBottom: S.x6,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'relative',
+      }}>
+        <div style={{
+          position: 'absolute', inset: -10,
+          background: `radial-gradient(circle, ${alpha(T.fillAccentStart, 0.15)}, transparent 65%)`,
+        }}/>
+        <img src={ILLU('illustration_calendar.png')} alt=""
+          style={{
+            width: 120, height: 120, objectFit: 'contain',
+            filter: `drop-shadow(0 12px 28px ${alpha(T.fillAccentStart, 0.3)})`,
+            position: 'relative', zIndex: 1,
+          }}/>
+      </div>
+      <div style={{ ...TY.headlineBase, color: T.fillPrimary, marginBottom: 8, lineHeight: 1.25 }}>
+        No hay misiones para vos hoy
+      </div>
+      <div style={{ ...TY.smallMedium, color: T.fillTertiary, maxWidth: 320, lineHeight: 1.5, marginBottom: S.x6 }}>
+        Sumamos misiones nuevas durante la semana. Te avisamos cuando lleguen.
+      </div>
+
+      {/* Primary bridge to Recompensas */}
+      <button onClick={onSwitchToRewards} style={{
+        cursor: 'pointer', fontFamily: FONT,
+        background: T.fillAccentStart, border: 'none',
+        borderRadius: 999, padding: '12px 24px',
+        ...TY.smallBold, color: '#0A0816',
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        boxShadow: `0 8px 22px ${alpha(T.fillAccentStart, 0.35)}`,
+        marginBottom: S.x4,
+      }}>
+        Mirá tus beneficios
+        <span style={{ fontSize: 16 }}>›</span>
+      </button>
+
+      {/* Secondary nudge */}
+      <div style={{
+        marginTop: S.x6, padding: '14px 16px', borderRadius: R.large,
+        background: alpha('#FBFBFB', 0.04),
+        border: `1px solid ${alpha('#FBFBFB', 0.08)}`,
+        display: 'flex', alignItems: 'center', gap: 12,
+        width: '100%', maxWidth: 340,
+      }}>
+        <span style={{ fontSize: 22 }}>🔔</span>
+        <div style={{ flex: 1, textAlign: 'left' }}>
+          <div style={{ ...TY.xSmallBold, color: T.fillPrimary, marginBottom: 2 }}>
+            Te avisamos cuando haya misiones
+          </div>
+          <div style={{ ...TY.xxSmallMedium, color: T.fillTertiary, lineHeight: 1.4 }}>
+            Activá las notificaciones desde tu perfil
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -901,16 +1063,25 @@
   };
 
   // ── Top-level: AdHocV1Misiones ────────────────────────────────
-  const AdHocV1Misiones = ({ persona, setToast }) => {
-    // endsAt computed once on mount so countdowns tick from a stable origin.
-    const initialMissions = useMemo(() => V1.active.map(m => ({
-      ...m,
-      endsAt: Date.now() + m.ends_in_seconds * 1000,
-    })), []);
+  const AdHocV1Misiones = ({ persona, setToast, onSwitchToRewards }) => {
+    const variant = persona.adhocVariant || 'standard';
+    const isDense = variant === 'dense';
+    const isEmpty = variant === 'empty';
+
+    // Source data depends on variant. endsAt computed once on mount.
+    const initialMissions = useMemo(() => {
+      if (isEmpty) return [];
+      const source = isDense ? V1.dense : V1.active;
+      return source.map(m => ({
+        ...m,
+        endsAt: Date.now() + m.ends_in_seconds * 1000,
+      }));
+    }, []);
     const [missions, setMissions] = useState(initialMissions);
 
     const [overlay, setOverlay] = useState(null);
     const [completionToast, setCompletionToast] = useState(null);
+    const [filter, setFilter] = useState('todas');
 
     // Order: active missions sorted by reward desc, then completed missions sorted by reward desc.
     // Hero = first of the sorted list (the highest-reward active mission, or the highest completed
@@ -949,10 +1120,28 @@
       setCompletionToast({ mission });
     };
 
+    // Counts per filter for the chip badge (dense only)
+    const filterCounts = useMemo(() => {
+      const counts = {};
+      FILTER_DEFS.forEach(def => {
+        counts[def.id] = missions.filter(def.match).length;
+      });
+      return counts;
+    }, [missions]);
+
+    // Apply active filter to the secondary list (dense only — others ignore filter)
+    const visibleSecondary = isDense
+      ? secondaryMissions.filter(FILTER_DEFS.find(d => d.id === filter)?.match || (() => true))
+      : secondaryMissions;
+
+    // Call-to-fill card visibility — when actionable mission count is sparse, except dense.
+    const actionableCount = missions.filter(m => m.state === 'available' || m.state === 'in_progress').length;
+    const showCallToFill = !isEmpty && !isDense && actionableCount <= 4 && actionableCount > 0;
+
     return (
       <div style={{ padding: `${S.x4}px ${S.x8}px 0`, fontFamily: FONT }}>
         {isAllEmpty ? (
-          <EmptyStateBridge/>
+          <EmptyStateBridge onSwitchToRewards={onSwitchToRewards}/>
         ) : (
           <>
             {/* Hero card */}
@@ -963,10 +1152,15 @@
                 onActivate={handleActivate}/>
             )}
 
-            {/* Secondary missions — flat list, no section headers */}
-            {secondaryMissions.length > 0 && (
+            {/* Filter chips (dense only) */}
+            {isDense && (
+              <FilterChips active={filter} onChange={setFilter} counts={filterCounts}/>
+            )}
+
+            {/* Secondary missions */}
+            {visibleSecondary.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {secondaryMissions.map(m => (
+                {visibleSecondary.map(m => (
                   <CompactMissionCard key={m.id} mission={m}
                     onTap={(mx) => setOverlay({ type: 'detail', mission: mx })}
                     onActivate={handleActivate}/>
@@ -974,6 +1168,20 @@
               </div>
             )}
 
+            {/* Filter empty state (dense, when filter excludes everything) */}
+            {isDense && visibleSecondary.length === 0 && secondaryMissions.length > 0 && (
+              <div style={{
+                padding: `${S.x8}px ${S.x4}px`, textAlign: 'center',
+                ...TY.smallMedium, color: T.fillTertiary,
+              }}>
+                Sin misiones en este filtro. Probá otro.
+              </div>
+            )}
+
+            {/* Call-to-fill card — only when sparse */}
+            {showCallToFill && (
+              <CallToFillCard onSwitchToRewards={onSwitchToRewards}/>
+            )}
           </>
         )}
 
