@@ -185,6 +185,7 @@
     const isAvailable = mission.state === 'available';
     const isInProgress = mission.state === 'in_progress';
     const isCompleted = mission.state === 'completed';
+    const isExpired = mission.state === 'expired';
     const accent = STATE_COLOR[mission.state];
 
     return (
@@ -272,14 +273,58 @@
             </div>
           )}
 
-          {/* Bottom: cashback anchor + CTA */}
+          {/* Stat ladder — stake & premio side by side, both prominent */}
           <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 14,
+            alignItems: 'center',
             paddingTop: S.x4,
             borderTop: `1px solid ${alpha('#FBFBFB', 0.08)}`,
+            marginBottom: S.x4,
           }}>
-            <PremioDisplay amount={mission.reward_amount} size="xl"
-              won={isCompleted}/>
+            <div>
+              <div style={{ ...TY.xxSmallBold, color: T.fillTertiary, letterSpacing: 0.8, marginBottom: 4 }}>
+                APOSTÁ
+              </div>
+              <div style={{
+                fontSize: 30, fontWeight: 900, lineHeight: 1, fontFamily: FONT,
+                color: isCompleted || isExpired ? T.fillTertiary : T.fillPrimary,
+                textDecoration: isExpired ? 'line-through' : 'none',
+              }}>
+                {fmtCurrency(mission.qualifying_target)}
+              </div>
+            </div>
+            <div style={{
+              color: T.fillTertiary, fontSize: 22, fontWeight: 700,
+              paddingTop: 18,
+            }}>→</div>
+            <div>
+              <div style={{
+                ...TY.xxSmallBold, letterSpacing: 0.8, marginBottom: 4,
+                color: isCompleted ? T.fillSuccess : isExpired ? T.fillTertiary : T.fillAccentStart,
+              }}>
+                GANÁ DE PREMIO
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <img src={ILLU('illustration_draftea_coin.png')} alt=""
+                  style={{
+                    width: 26, height: 26, objectFit: 'contain',
+                    filter: isExpired
+                      ? 'grayscale(0.6) opacity(0.55)'
+                      : 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
+                  }}/>
+                <span style={{
+                  fontSize: 30, fontWeight: 900, lineHeight: 1, fontFamily: FONT,
+                  color: isCompleted ? T.fillSuccess : isExpired ? T.fillTertiary : T.fillAccentStart,
+                  textDecoration: isExpired ? 'line-through' : 'none',
+                }}>
+                  +{fmtCurrency(mission.reward_amount)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA row */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             {isAvailable && (
               <button
                 type="button"
@@ -288,7 +333,7 @@
                   cursor: 'pointer',
                   background: T.fillAccentStart,
                   border: 'none',
-                  borderRadius: 999, padding: '11px 22px',
+                  borderRadius: 999, padding: '12px 24px',
                   fontFamily: FONT,
                   ...TY.smallBold, color: '#0A0816',
                   display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -308,6 +353,12 @@
               <span style={{ ...TY.smallBold, color: T.fillSuccess,
                 display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 Ver detalles <span style={{ fontSize: 16 }}>›</span>
+              </span>
+            )}
+            {isExpired && (
+              <span style={{ ...TY.smallBold, color: T.fillTertiary,
+                display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                Ver detalle <span style={{ fontSize: 16 }}>›</span>
               </span>
             )}
           </div>
