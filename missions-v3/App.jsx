@@ -453,32 +453,6 @@ const MissionsHub = ({ persona, onBack }) => {
           <>
             <window.AdHocV1Misiones persona={persona} setToast={setToast}/>
 
-            {/* Stronger seam: a card-style header announcing the category change */}
-            <div style={{ padding: `${S.x8}px ${S.x8}px ${S.x2}px` }}>
-              <div style={{
-                background: `linear-gradient(135deg, ${alpha(T.actionPrimaryDefaultGradStart, 0.12)} 0%, ${alpha('#FBFBFB', 0.02)} 100%)`,
-                border: `1px solid ${alpha(T.actionPrimaryDefaultGradStart, 0.25)}`,
-                borderRadius: R.large, padding: '14px 16px',
-                display: 'flex', alignItems: 'center', gap: 12,
-              }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 12,
-                  background: G.actionPrimary,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 22,
-                  boxShadow: `0 8px 18px ${alpha(T.actionPrimaryDefaultGradStart, 0.4)}`,
-                }}>🎁</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ ...TY.baseBold, color: T.fillPrimary, marginBottom: 2 }}>
-                    Tus beneficios de Lealtad
-                  </div>
-                  <div style={{ ...TY.xSmallMedium, color: T.fillTertiary, lineHeight: 1.4 }}>
-                    Lo que ya tenés activo por tu nivel — independiente de las misiones.
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <RewardsTab persona={persona} claimedReward={claimedReward}/>
           </>
         )}
